@@ -29,6 +29,11 @@ public final class Config {
     public float barX = 0.5f;
     public float barY = 0.08f;
     public float barScale = 1.5f;
+    /** licznik TPS */
+    public boolean showTps = true;
+    public float tpsX = 0.01f;
+    public float tpsY = 0.01f;
+    public float tpsScale = 1.0f;
     /** true = punkty zdrowia (1 serce = 2 pkt), false = serca */
     public boolean usePoints = false;
     /** zasięg wykrywania gracza pod celownikiem (bloki) */
@@ -54,6 +59,9 @@ public final class Config {
         }
         INSTANCE.scale = Math.max(0.5f, Math.min(6f, INSTANCE.scale));
         INSTANCE.barScale = Math.max(0.5f, Math.min(6f, INSTANCE.barScale));
+        INSTANCE.tpsScale = Math.max(0.5f, Math.min(6f, INSTANCE.tpsScale));
+        INSTANCE.tpsX = Math.max(0f, Math.min(1f, INSTANCE.tpsX));
+        INSTANCE.tpsY = Math.max(0f, Math.min(1f, INSTANCE.tpsY));
         INSTANCE.barX = Math.max(0f, Math.min(1f, INSTANCE.barX));
         INSTANCE.barY = Math.max(0f, Math.min(1f, INSTANCE.barY));
         INSTANCE.posX = Math.max(0f, Math.min(1f, INSTANCE.posX));

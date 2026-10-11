@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HeartIndicator (4)/HeartIndicator
     steps:
       - uses: actions/checkout@v4
 
@@ -28,5 +31,5 @@ jobs:
         with:
           name: HeartIndicator-mod
           path: |
-            build/libs/heartindicator-*.jar
-            !build/libs/*-sources.jar
+            HeartIndicator (4)/HeartIndicator/build/libs/heartindicator-*.jar
+            !HeartIndicator (4)/HeartIndicator/build/libs/*-sources.jar

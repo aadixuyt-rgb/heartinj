@@ -10,6 +10,7 @@
     "sources": "https://www.youtube.com/@SpunkyInsaan20/"
   },
   "license": "MIT",
+  "mixins": ["heartindicator.mixins.json"],
   "icon": "assets/heartindicator/icon.png",
   "environment": "client",
   "entrypoints": { "client": ["me.spunkyinsaan.heartindicator.HeartIndicatorMod"] },

@@ -11,7 +11,7 @@ import net.minecraft.util.Formatting;
  * ciągniesz w różne strony, żeby go powiększyć/pomniejszyć. Przyciski z okiem u góry ukrywają element.
  */
 public class HeartScreen extends Screen {
-    private enum El { TEXT, BAR }
+    private enum El { TEXT, BAR, TPS }
 
     private static final int HANDLE = 10;
     private static final String NAME = "Nick";
@@ -45,14 +45,15 @@ public class HeartScreen extends Screen {
     }
 
     private boolean enabled(El e) {
-        return e == El.TEXT ? Config.INSTANCE.showText : Config.INSTANCE.showBar;
+        return e == El.TEXT ? Config.INSTANCE.showText : e == El.BAR ? Config.INSTANCE.showBar : Config.INSTANCE.showTps;
     }
 
     private float scaleOf(El e) {
-        return e == El.TEXT ? Config.INSTANCE.scale : Config.INSTANCE.barScale;
+        return e == El.TEXT ? Config.INSTANCE.scale : e == El.BAR ? Config.INSTANCE.barScale : Config.INSTANCE.tpsScale;
     }
 
     private int[] base(El e) {
+        if (e == El.TPS) return HudRenderer.tpsSize(client, 20f);
         return e == El.TEXT ? HudRenderer.textSize(client, NAME, previewText()) : HudRenderer.barSize(client, NAME);
     }
 
@@ -61,8 +62,8 @@ public class HeartScreen extends Screen {
         Config c = Config.INSTANCE;
         int[] s = base(e);
         float sc = scaleOf(e);
-        float fx = e == El.TEXT ? c.posX : c.barX;
-        float fy = e == El.TEXT ? c.posY : c.barY;
+        float fx = e == El.TEXT ? c.posX : e == El.BAR ? c.barX : c.tpsX;
+        float fy = e == El.TEXT ? c.posY : e == El.BAR ? c.barY : c.tpsY;
         return new int[]{Math.round(fx * this.width), Math.round(fy * this.height),
                 Math.round(s[0] * sc), Math.round(s[1] * sc)};
     }
@@ -89,11 +90,15 @@ public class HeartScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Napis"), b -> {
             Config.INSTANCE.showText = !Config.INSTANCE.showText;
             Config.save();
-        }).dimensions(cx - 78, 20, 76, 20).build());
+        }).dimensions(cx - 118, 20, 76, 20).build());
         addDrawableChild(ButtonWidget.builder(Text.literal("Pasek"), b -> {
             Config.INSTANCE.showBar = !Config.INSTANCE.showBar;
             Config.save();
-        }).dimensions(cx + 2, 20, 76, 20).build());
+        }).dimensions(cx - 38, 20, 76, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("TPS"), b -> {
+            Config.INSTANCE.showTps = !Config.INSTANCE.showTps;
+            Config.save();
+        }).dimensions(cx + 42, 20, 76, 20).build());
 
         addDrawableChild(ButtonWidget.builder(unitLabel(), b -> {
             Config.INSTANCE.usePoints = !Config.INSTANCE.usePoints;
@@ -142,7 +147,8 @@ public class HeartScreen extends Screen {
         boolean grabbed = active == e && (moving || resizing);
         ctx.fill(b[0] - 3, b[1] - 3, b[0] + b[2] + 3, b[1] + b[3] + 3, grabbed ? 0x6655AAFF : (on ? 0x44FFFFFF : 0x22FFFFFF));
         if (on) {
-            if (e == El.TEXT) HudRenderer.drawText(ctx, client, b[0], b[1], c.scale, NAME, 4f, 20f, 0f);
+            if (e == El.TPS) HudRenderer.drawTps(ctx, client, b[0], b[1], c.tpsScale, 20f);
+            else if (e == El.TEXT) HudRenderer.drawText(ctx, client, b[0], b[1], c.scale, NAME, 4f, 20f, 0f);
             else HudRenderer.drawBar(ctx, client, b[0], b[1], c.barScale, NAME, 10f, 20f, 4f);
         } else {
             ctx.drawCenteredTextWithShadow(this.textRenderer, Text.literal("ukryty").formatted(Formatting.DARK_GRAY),
@@ -156,10 +162,12 @@ public class HeartScreen extends Screen {
         super.render(ctx, mouseX, mouseY, delta);
         drawElement(ctx, El.BAR);
         drawElement(ctx, El.TEXT);
+        drawElement(ctx, El.TPS);
 
         int cx = this.width / 2;
-        drawEye(ctx, cx - 78 + 5, 20 + 6, Config.INSTANCE.showText);
-        drawEye(ctx, cx + 2 + 5, 20 + 6, Config.INSTANCE.showBar);
+        drawEye(ctx, cx - 118 + 5, 20 + 6, Config.INSTANCE.showText);
+        drawEye(ctx, cx - 38 + 5, 20 + 6, Config.INSTANCE.showBar);
+        drawEye(ctx, cx + 42 + 5, 20 + 6, Config.INSTANCE.showTps);
 
         ctx.drawCenteredTextWithShadow(this.textRenderer,
                 Text.literal("Złap element i przesuń • ciągnij kwadracik ↘ = rozmiar • oko = ukryj • Esc = gotowe")
@@ -173,14 +181,14 @@ public class HeartScreen extends Screen {
     public boolean mouseClicked(double mx, double my, int button) {
         if (super.mouseClicked(mx, my, button)) return true;
         if (button != 0) return false;
-        for (El e : new El[]{El.TEXT, El.BAR}) {
+        for (El e : new El[]{El.TPS, El.TEXT, El.BAR}) {
             if (onHandle(e, mx, my)) {
                 active = e;
                 resizing = true;
                 return true;
             }
         }
-        for (El e : new El[]{El.TEXT, El.BAR}) {
+        for (El e : new El[]{El.TPS, El.TEXT, El.BAR}) {
             if (onBox(e, mx, my)) {
                 int[] b = box(e);
                 active = e;
@@ -202,14 +210,17 @@ public class HeartScreen extends Screen {
             int[] b = box(active);
             double ns = (((mx - b[0]) / s[0]) + ((my - b[1]) / s[1])) / 2.0;
             float v = (float) Math.max(0.5, Math.min(6.0, ns));
-            if (active == El.TEXT) c.scale = v; else c.barScale = v;
+            if (active == El.TEXT) c.scale = v; else if (active == El.BAR) c.barScale = v; else c.tpsScale = v;
             return true;
         }
         if (active != null && moving) {
             int[] b = box(active);
             double nx = Math.max(0, Math.min(this.width - b[2] - HANDLE - 4, mx - grabDx));
             double ny = Math.max(0, Math.min(this.height - b[3] - HANDLE - 4, my - grabDy));
-            if (active == El.TEXT) {
+            if (active == El.TPS) {
+                c.tpsX = (float) (nx / this.width);
+                c.tpsY = (float) (ny / this.height);
+            } else if (active == El.TEXT) {
                 c.posX = (float) (nx / this.width);
                 c.posY = (float) (ny / this.height);
             } else {
@@ -238,6 +249,7 @@ public class HeartScreen extends Screen {
         Config c = Config.INSTANCE;
         float d = (float) Math.signum(vertical) * 0.25f;
         if (onBox(El.TEXT, mx, my)) c.scale = Math.max(0.5f, Math.min(6f, c.scale + d));
+        else if (onBox(El.TPS, mx, my)) c.tpsScale = Math.max(0.5f, Math.min(6f, c.tpsScale + d));
         else if (onBox(El.BAR, mx, my)) c.barScale = Math.max(0.5f, Math.min(6f, c.barScale + d));
         else return super.mouseScrolled(mx, my, horizontal, vertical);
         Config.save();

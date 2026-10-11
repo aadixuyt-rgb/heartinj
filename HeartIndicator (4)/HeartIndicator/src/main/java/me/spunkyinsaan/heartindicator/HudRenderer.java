@@ -166,6 +166,25 @@ public final class HudRenderer {
         ctx.getMatrices().pop();
     }
 
+    // ---------------------------------------------------------------- TPS
+
+    public static String tpsLabel(float tps) {
+        return "TPS: " + (tps < 0 ? "--" : String.format(java.util.Locale.ROOT, "%.1f", tps));
+    }
+
+    public static int[] tpsSize(MinecraftClient mc, float tps) {
+        return new int[]{mc.textRenderer.getWidth(tpsLabel(tps)), 9};
+    }
+
+    public static void drawTps(DrawContext ctx, MinecraftClient mc, int x, int y, float scale, float tps) {
+        int col = tps < 0 ? WHITE : tps >= 18f ? 0xFF55FF55 : tps >= 15f ? 0xFFFFFF55 : 0xFFFF5555;
+        ctx.getMatrices().push();
+        ctx.getMatrices().translate(x, y, 0);
+        ctx.getMatrices().scale(scale, scale, 1f);
+        ctx.drawText(mc.textRenderer, Text.literal(tpsLabel(tps)), 0, 0, col, true);
+        ctx.getMatrices().pop();
+    }
+
     // ---------------------------------------------------------------- HUD w grze
 
     public static void render(DrawContext ctx) {
@@ -173,6 +192,10 @@ public final class HudRenderer {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (!c.renderingEnabled || mc.player == null || mc.world == null) return;
         if (mc.options.hudHidden || mc.currentScreen != null) return;
+        if (c.showTps) {
+            drawTps(ctx, mc, Math.round(c.tpsX * mc.getWindow().getScaledWidth()),
+                    Math.round(c.tpsY * mc.getWindow().getScaledHeight()), c.tpsScale, TpsTracker.getLive());
+        }
         if (!c.showText && !c.showBar) return;
 
         PlayerEntity shown = null;

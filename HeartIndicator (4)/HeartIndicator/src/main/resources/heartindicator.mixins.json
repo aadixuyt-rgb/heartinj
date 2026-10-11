@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "me.spunkyinsaan.heartindicator.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ClientConnectionMixin",
+    "ClientPlayNetworkHandlerMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}
