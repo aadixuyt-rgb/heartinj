@@ -100,11 +100,33 @@ public class HeartScreen extends Screen {
             Config.save();
         }).dimensions(cx + 42, 20, 76, 20).build());
 
+        addDrawableChild(ButtonWidget.builder(overheadLabel(), b -> {
+            Config.INSTANCE.showOverhead = !Config.INSTANCE.showOverhead;
+            Config.save();
+            clearAndInit();
+        }).dimensions(cx - 90, this.height - 76, 180, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("-"), b -> {
+            Config.INSTANCE.overheadScale = Math.max(0.5f, Math.round((Config.INSTANCE.overheadScale - 0.25f) * 100) / 100f);
+            Config.save();
+            clearAndInit();
+        }).dimensions(cx - 90, this.height - 52, 20, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("+"), b -> {
+            Config.INSTANCE.overheadScale = Math.min(3f, Math.round((Config.INSTANCE.overheadScale + 0.25f) * 100) / 100f);
+            Config.save();
+            clearAndInit();
+        }).dimensions(cx + 70, this.height - 52, 20, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Rozmiar serc nad graczami: " + Config.INSTANCE.overheadScale + "x"), b -> {})
+                .dimensions(cx - 68, this.height - 52, 136, 20).build());
+
         addDrawableChild(ButtonWidget.builder(unitLabel(), b -> {
             Config.INSTANCE.usePoints = !Config.INSTANCE.usePoints;
             Config.save();
             clearAndInit();
         }).dimensions(cx - 90, this.height - 28, 180, 20).build());
+    }
+
+    private Text overheadLabel() {
+        return Text.literal("Serca nad graczami: " + (Config.INSTANCE.showOverhead ? "WŁ" : "WYŁ"));
     }
 
     private Text unitLabel() {

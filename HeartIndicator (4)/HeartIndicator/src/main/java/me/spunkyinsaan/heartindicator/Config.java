@@ -29,6 +29,9 @@ public final class Config {
     public float barX = 0.5f;
     public float barY = 0.08f;
     public float barScale = 1.5f;
+    /** duże serca nad głowami graczy (jak w oryginalnym Heart Indicator) */
+    public boolean showOverhead = false;
+    public float overheadScale = 1.0f;
     /** licznik TPS */
     public boolean showTps = true;
     public float tpsX = 0.01f;
@@ -59,6 +62,7 @@ public final class Config {
         }
         INSTANCE.scale = Math.max(0.5f, Math.min(6f, INSTANCE.scale));
         INSTANCE.barScale = Math.max(0.5f, Math.min(6f, INSTANCE.barScale));
+        INSTANCE.overheadScale = Math.max(0.5f, Math.min(3f, INSTANCE.overheadScale));
         INSTANCE.tpsScale = Math.max(0.5f, Math.min(6f, INSTANCE.tpsScale));
         INSTANCE.tpsX = Math.max(0f, Math.min(1f, INSTANCE.tpsX));
         INSTANCE.tpsY = Math.max(0f, Math.min(1f, INSTANCE.tpsY));
